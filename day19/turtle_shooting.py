@@ -10,7 +10,7 @@ from typing import Optional
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
 logging.basicConfig(
-    level=logging.INFO, format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s"
+    level=logging.DEBUG, format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s"
 )
 
 BOARD_HEIGHT = 200
@@ -89,7 +89,7 @@ class Shooter(tt.Turtle):
     PROXIMITY = (
         10  # the largest permissable distance between bullet and target to score
     )
-    REACT_TIME = 0.1
+    REACT_TIME = 1000
 
     def __init__(
         self,
@@ -112,33 +112,41 @@ class Shooter(tt.Turtle):
         self._forward_pressed = False
         self._backward_pressed = False
 
-    def _turn_left(self):
-        self._left_pressed = True
-        while self._left_pressed:
-            logger.debug("left turning")
+    def _turn_left(self, call_num=0):
+        if call_num == 0:
+            self._left_pressed = True
+        if self._left_pressed:
+            logger.debug(f"left turning {call_num}")
             self.lt(self.MIN_AGL)
-            time.sleep(self.REACT_TIME)
+            self.screen.ontimer(lambda: self._turn_left(call_num + 1), self.REACT_TIME)
 
-    def _turn_right(self):
-        self._right_pressed = True
-        while self._right_pressed:
-            logger.debug("right turning")
+    def _turn_right(self, call_num=0):
+        if call_num == 0:
+            self._right_pressed = True
+        if self._right_pressed:
+            logger.debug(f"right turning {call_num}")
             self.lt(-self.MIN_AGL)
-            time.sleep(self.REACT_TIME)
+            self.screen.ontimer(lambda: self._turn_right(call_num + 1), self.REACT_TIME)
 
-    def _move_forward(self):
-        self._forward_pressed = True
-        while self._forward_pressed:
-            logger.debug("going forward")
+    def _move_forward(self, call_num=0):
+        if call_num == 0:
+            self._forward_pressed = True
+        if self._forward_pressed:
+            logger.debug(f"going forward {call_num}")
             self.fd(self.MIN_DIST)
-            time.sleep(self.REACT_TIME)
+            self.screen.ontimer(
+                lambda: self._move_forward(call_num + 1), self.REACT_TIME
+            )
 
-    def _move_backward(self):
-        self._backward_pressed = True
-        while self._backward_pressed:
-            logger.debug("moving backward")
+    def _move_backward(self, call_num=0):
+        if call_num == 0:
+            self._backward_pressed = True
+        if self._backward_pressed:
+            logger.debug(f"moving backward {call_num}")
             self.fd(-self.MIN_DIST)
-            time.sleep(self.REACT_TIME)
+            self.screen.ontimer(
+                lambda: self._move_backward(call_num + 1), self.REACT_TIME
+            )
 
     def _cancel_left(self):
         logger.debug("cancel left")

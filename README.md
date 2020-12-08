@@ -14,3 +14,6 @@ Referencing Udemy course *100 days of Code* by Angela
 - check out Tkinter, practice functional arguments
 - lb to kg coverter
 
+## Day 28
+- more Tkinter
+- Pomodoro timer
