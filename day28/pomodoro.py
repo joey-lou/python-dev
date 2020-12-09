@@ -44,6 +44,7 @@ class Pomodoro:
         # draw out canvas elements
         tomato_bkg = PhotoImage(file=image_loc)
         self.tomato.create_image(25, 20, image=tomato_bkg, anchor=NW)
+        self.tomato.img = tomato_bkg  # image garbage collector bug
         self.tomato_time = self.tomato.create_text(
             90,
             125,
@@ -75,9 +76,6 @@ class Pomodoro:
         self._set_background(self.COLOR_ROTATION[0])
         self._set_timer(0)
         self._set_checkmark(0)
-
-        # FIXME: for some reason mainloop has to be called with grid or pack
-        root.mainloop()
 
     def _set_timer(self, seconds):
         self.timer = dt.time(0, seconds // 60, seconds % 60).strftime("%M:%S")
@@ -149,3 +147,4 @@ class Pomodoro:
 if __name__ == "__main__":
     root = Tk()
     Pomodoro(root)
+    root.mainloop()
