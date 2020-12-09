@@ -21,7 +21,7 @@ class Pomodoro:
     LONG_BREAK_MIN = 0.1
     FONT_SIZE = 35
 
-    COLOR_ROTATION = [PINK, RED, YELLOW, GREEN]
+    COLOR_ROTATION = [PINK, RED, YELLOW, GREEN]  # potentially rotate color pallete
 
     def __init__(self, root: Tk, image_loc: str = "tomato.png"):
         root.title("Pomodoro")
@@ -76,6 +76,7 @@ class Pomodoro:
         self._set_timer(0)
         self._set_checkmark(0)
 
+        # FIXME: for some reason mainloop has to be called with grid or pack
         root.mainloop()
 
     def _set_timer(self, seconds):
