@@ -19,3 +19,11 @@ def check(ctx):
     for command in commands:
         ctx.run(command)
     print("Done checking!")
+
+
+@task(aliases=["dev"])
+def develop(ctx):
+    commands = ["python setup.py develop"]
+    for command in commands:
+        ctx.run(command)
+    print("Package ready for development")

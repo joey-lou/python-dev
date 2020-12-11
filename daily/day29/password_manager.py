@@ -15,7 +15,7 @@ class PasswordManager:
         root.title("Password Manager")
         root.config(padx=20, pady=20)
         canvas = Canvas(root, height=200, width=200)
-        lock_img = PhotoImage(file="logo.png")
+        lock_img = PhotoImage(file="./daily/day29/logo.png")  # path relative to package
         canvas.create_image(100, 100, image=lock_img)  # default to center rule
         canvas.grid(column=1, row=0)
         canvas.img = lock_img

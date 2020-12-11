@@ -20,3 +20,8 @@ Referencing Udemy course *100 days of Code* by Angela
 
 ## Day 29
 - use Tkinter to make password manager
+
+## Day 30
+- exceptions and error handling
+- update password manager to include searcher
+
