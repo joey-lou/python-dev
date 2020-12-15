@@ -1,6 +1,6 @@
 # Python Dev Poractice
 Development practice projects in Python\
-Referencing Udemy course *100 days of Code* by Angela 
+Referencing Udemy course *100 days of Code* by Angela with some tweaks
 
 ## Day 18
 - check out turtle package
@@ -25,3 +25,7 @@ Referencing Udemy course *100 days of Code* by Angela
 - exceptions and error handling
 - update password manager to include searcher
 
+## Day 32
+- email SMTP and datetime
+- auto birthday email sender, actually kinda useful :)
+- adding generic oauth2 handler
