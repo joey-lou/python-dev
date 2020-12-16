@@ -1,16 +1,9 @@
 import base64
-import imaplib
 import json
 import logging
-import os
-import smtplib
 import urllib.parse
 import urllib.request
-from abc import ABC, abstractclassmethod, abstractmethod, abstractstaticmethod
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
-import lxml.html
 
 logger = logging.getLogger(__name__)
 

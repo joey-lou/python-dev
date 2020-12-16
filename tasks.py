@@ -2,12 +2,16 @@
 
 
 # use invoke to clean code
-from invoke import run, task
+from invoke import task
 
 
 @task(aliases=["fmt"])
 def format(ctx):
-    commands = ["black ./", "isort ./"]
+    commands = [
+        "black ./",
+        "isort ./",
+        "autoflake -i -r --remove-unused-variables --remove-all-unused-imports ./",
+    ]
     for command in commands:
         ctx.run(command)
     print("Done formatting!")

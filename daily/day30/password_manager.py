@@ -1,6 +1,4 @@
 import json
-import os
-import random
 from collections import Counter
 from tkinter import *
 from tkinter import messagebox

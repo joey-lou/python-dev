@@ -4,8 +4,6 @@ import os
 import random
 import time
 import turtle as tt
-from threading import Thread
-from typing import Optional
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)

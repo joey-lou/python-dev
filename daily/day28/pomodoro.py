@@ -1,7 +1,6 @@
 import datetime as dt
 from enum import IntEnum
 from tkinter import *
-from tkinter import ttk
 
 
 class WorkStatus(IntEnum):
