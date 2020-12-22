@@ -29,3 +29,7 @@ Referencing Udemy course *100 days of Code* by Angela with some tweaks
 - email SMTP and datetime
 - auto birthday email sender, actually kinda useful :)
 - adding generic oauth2 handler
+
+## Day 34
+- API call exercise
+- integrate with tkinter to make interactive quiz app

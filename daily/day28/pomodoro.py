@@ -21,7 +21,7 @@ class Pomodoro:
     FONT_SIZE = 35
 
     COLOR_ROTATION = [PINK, RED, YELLOW, GREEN]  # potentially rotate color pallete
-
+    # TODO: add color rotation on phase change
     def __init__(self, root: Tk, image_loc: str = "tomato.png"):
         root.title("Pomodoro")
         root.config(padx=100, pady=50)

@@ -7,9 +7,6 @@ from tools.email_sender import GmailSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
-logging.basicConfig(
-    level=logging.DEBUG, format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s"
-)
 
 
 def main():
@@ -21,8 +18,6 @@ def main():
         msg["Subject"] = "Test"
         msg["To"] = to_addrs
 
-        # Create the body of the message (a plain-text and an HTML version).
-        text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
         html = """\
         <html>
         <head></head>
@@ -35,14 +30,13 @@ def main():
         </html>
         """
 
-        part1 = MIMEText(text, "plain")
-        part2 = MIMEText(html, "html")
-
-        msg.attach(part1)
-        msg.attach(part2)
-
+        msg.attach(MIMEText(html, "html"))
         gsender.send([to_addrs], msg.as_string())
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s",
+    )
     main()
