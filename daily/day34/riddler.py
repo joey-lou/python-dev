@@ -91,7 +91,7 @@ class Riddler:
     A riddler that asks you true/false trivia questions
     """
 
-    DEFAULT_CRED_PATH = "./secret/creds.json"  # user specific path
+    DEFAULT_CRED_PATH = "./secret/google_creds.json"  # user specific path
     RIDDLER_IMG = "./daily/day34/riddler.png"
     TRUE_IMG = "./daily/day34/true.png"
     FALSE_IMG = "./daily/day34/false.png"

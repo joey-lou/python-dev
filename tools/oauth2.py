@@ -14,7 +14,7 @@ class Oauth2Runner:
     GOOGLE_ACCOUNTS_BASE_URL = "https://accounts.google.com"
     REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
     DEFAULT_SCOPE = "https://mail.google.com/"
-    DEFAULT_CRED_PATH = "./secret/creds.json"  # user specific path
+    DEFAULT_CRED_PATH = "./secret/google_creds.json"  # user specific path
 
     def __init__(
         self,

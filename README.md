@@ -33,3 +33,7 @@ Referencing Udemy course *100 days of Code* by Angela with some tweaks
 ## Day 34
 - API call exercise
 - integrate with tkinter to make interactive quiz app
+
+## Day 35
+- API call exercise
+- integrate with sms messenger service, twilio API is really straightforward
