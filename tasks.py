@@ -19,7 +19,7 @@ def format(ctx):
 
 @task
 def check(ctx):
-    commands = ["black ./ --check", "isort ./ --check-only", "flake8 ./"]
+    commands = ["black ./ --check", "isort ./ --check-only", "autoflake -c -r ./"]
     for command in commands:
         ctx.run(command)
     print("Done checking!")

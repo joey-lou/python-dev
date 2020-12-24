@@ -2,6 +2,11 @@
 Development practice projects in Python\
 Referencing Udemy course *100 days of Code* by Angela with some tweaks
 
+## Navigate through repo
+The repo is very loosely structured, but the idea is to be able to easily setup and run the scripts locally. The package content is not meant to be ran in production.
+* `tools` should contain some recurring functionalities and useful helper functions
+* `daily` and its subdirectories contain usually one-off projects that have a clear deliverable and is runnable
+
 ## Day 18
 - check out turtle package
 - simple drawing app using turtle
@@ -37,3 +42,7 @@ Referencing Udemy course *100 days of Code* by Angela with some tweaks
 ## Day 35
 - API call exercise
 - integrate with sms messenger service, twilio API is really straightforward
+
+## Day 36
+- More API exercise
+- check out stock news api 

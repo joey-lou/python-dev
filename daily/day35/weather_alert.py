@@ -7,15 +7,11 @@ from typing import List, NamedTuple
 import requests
 from twilio.rest import Client
 
+from tools.consts import OPENWEATHER_CREDS, TWILIO_CREDS
+from tools.utils import TwilioCreds, TwilioTextSender
+
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
-
-
-class TwilioCreds(NamedTuple):
-    account_sid: str
-    auth_token: str
-    from_number: str
-    to_number: str
 
 
 class WeatherData(NamedTuple):
@@ -26,28 +22,29 @@ class WeatherData(NamedTuple):
     description: str
 
 
-# Wh = namedtuple("weather_data", ["time", "id", "main", "temperature", "description"])
-
-
 class WeatherAlerter:
     """ Simple framework for responding to weathers
         Currently just send alert if target weather is detected in the next 24 hours
     """
 
-    OPENWEATHER_CRED = "./secret/openweather_creds.json"
-    TWILIO_CRED = "./secret/twilio_creds.json"
     SNOW = 600
     THUNDERSTORM = 200
     CLOUDY = 800
 
-    def __init__(self, _lat: float, _lon: float, hour: int = 24):
+    def __init__(
+        self,
+        _lat: float,
+        _lon: float,
+        open_weather_creds_loc: str,
+        twilio_creds_loc: str,
+        hour: int = 24,
+    ):
         self._lat: float = _lat
         self._lon: float = _lon
         self._hour: int = hour
-        self._weather_api_key: str = self._load_weather_creds(self.OPENWEATHER_CRED)
-        self._twilio_creds: TwilioCreds = self._load_twilio_creds(self.TWILIO_CRED)
+        self._weather_api_key: str = self._load_weather_creds(open_weather_creds_loc)
 
-        self.twilio_client: Client = self._make_twilio_client(self._twilio_creds)
+        self.text_sender = TwilioTextSender.from_json(twilio_creds_loc)
 
     @staticmethod
     def _make_twilio_client(twilio_creds: TwilioCreds):
@@ -82,12 +79,21 @@ class WeatherAlerter:
 
     @staticmethod
     def _make_message(hourly_matches: List):
+        def day_time(datetime: dt.datetime):
+            diff = datetime.day - dt.datetime.now().day
+            if diff == 1:
+                return f"tomorrow {datetime:%I:%M%p}"
+            elif diff == 0:
+                return f"today {datetime:%I:%M%p}"
+            else:
+                raise RuntimeError("only future dates are expected in forecast")
+
         times = [h.time for h in hourly_matches]
         min_time, max_time = min(times), max(times)
         worst = sorted(hourly_matches, key=lambda x: x.id)[-1]
         condition = hourly_matches[0].main
-        message = f"Expect {condition.lower()} from {min_time:%I:%m%p} to {max_time:%I:%m%p}\n"
-        message += f"Worst at {worst.time:%I:%m%p} with {worst.description} at {worst.temperature}C"
+        message = f"Expect {condition.lower()} from {day_time(min_time)} to {day_time(max_time)}\n"
+        message += f"Worst at {day_time(worst.time)} with {worst.description} at {worst.temperature}C"
         return message
 
     def check_target_condition(self, target: int):
@@ -99,6 +105,7 @@ class WeatherAlerter:
             temp = hour_item["temp"]
             for weather in hour_item["weather"]:
                 wid = weather["id"]
+                logger.debug(f"{temp} celsius at {time}, with wid {wid}")
                 if self._is_within_range(target, wid):
                     hourly_matches.append(
                         WeatherData(
@@ -106,18 +113,9 @@ class WeatherAlerter:
                         )
                     )
         if hourly_matches:
-            self.send_message(self._make_message(hourly_matches))
+            self.text_sender.send_message(self._make_message(hourly_matches))
         else:
             logger.info("no targeted weather found, no message sent")
-
-    def send_message(self, message_body: str):
-        logger.info("sending message")
-        message = self.twilio_client.messages.create(
-            from_=self._twilio_creds.from_number,
-            to=self._twilio_creds.to_number,
-            body=message_body,
-        )
-        logger.info(f"message sent with {message.sid} with status {message.status}")
 
 
 if __name__ == "__main__":
@@ -125,5 +123,10 @@ if __name__ == "__main__":
         level=logging.DEBUG,
         format=f"{__name__}[%(levelname)s][%(asctime)s]: %(message)s",
     )
-    wa = WeatherAlerter(41.881832, -87.623177)
-    wa.check_target_condition(WeatherAlerter.SNOW)
+    wa = WeatherAlerter(
+        41.881832,
+        -87.623177,
+        open_weather_creds_loc=OPENWEATHER_CREDS,
+        twilio_creds_loc=TWILIO_CREDS,
+    )
+    wa.check_target_condition(WeatherAlerter.CLOUDY)
