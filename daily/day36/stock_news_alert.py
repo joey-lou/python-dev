@@ -1,54 +1,186 @@
-from tools.consts import FINNHUB_CREDS
-from typing import List
+import datetime as dt
+import json
+import logging
+import os
+import time
+from typing import Dict, List, NamedTuple
+
+import requests
+
+from tools.consts import FINNHUB_CREDS, TWILIO_CREDS
+from tools.utils import TwilioTextSender
+
+APP_NAME = os.path.basename(__file__).replace(".py", "")
+logger = logging.getLogger(APP_NAME)
+
+CONFIG = {
+    "cred_loc": FINNHUB_CREDS,
+    "ticker": "AAPL",
+    "twilio_loc": TWILIO_CREDS,
+    "threshold": 0.005,
+}
+
+
+class QuoteData(NamedTuple):
+    dt: dt.datetime
+    previous_close: float
+    current: float
+    move: float
+
+
+class NewsData(NamedTuple):
+    id: int
+    dt: dt.datetime
+    headline: str
+    summary: str
+    url: str
+
 
 class StockPriceMonitor:
     """ Monitor stock movements during day since last closing price
         If price dips or rises beyond threshold, alert user with most recent news
-    """
-    DEFAULT_INTERVAL = 60
 
-    def __init__(self, ticker: str, api_key: str, news_alert: bool = True):
-        self.ticker = ticker
+        Potentially improements such as tracking history of movement and sending smarter alerts:
+        1. if previously alerted and the price moved in opposite direction (reaching below threshold)
+            we may send an alert saying now the price movement has reverted
+        2. if price moved in same direction but only by a bit, we can say the price move persisted,
+            and send updated news
+    """
+
+    DEFAULT_INTERVAL = 3600  # default to hourly update
+    DEFAULT_THRESHOLD = 0.03
+
+    def __init__(
+        self,
+        ticker: str,
+        api_key: str,
+        text_sender: TwilioTextSender,
+        news_alert: bool = True,
+        threshold: float = DEFAULT_THRESHOLD,
+    ):
+        self.text_sender = text_sender
+        self._ticker = ticker
         self._api_key = api_key
+        self._quote = None
+        self._threshold = threshold
+        self._news_alert = news_alert
+        self._news_cache = {}  # track news we have seen already
 
     @classmethod
-    def from_json(cls):
-        return cls()
+    def from_serializable(cls, config: Dict):
+        with open(config["cred_loc"], "r") as fp:
+            creds = json.load(fp)
+            api_key = creds["api_key"]
+        ticker = config["ticker"]
+        text_sender = TwilioTextSender.from_json(config["twilio_loc"])
+        news_alert = config.get("news_alert") or True
+        threshold = config.get("threshold") or cls.DEFAULT_THRESHOLD
+        return cls(ticker, api_key, text_sender, news_alert, threshold)
 
-
-    def start():
+    def start(self, interval: int = DEFAULT_INTERVAL):
         """ simply invoke run and go to sleep until time is up
         """
-        raise NotImplementedError
+        logger.info(f"starting {self.__class__.__name__}")
+        while True:
+            self.run()
+            logger.info(f"sleeping for {interval}")
+            time.sleep(interval)
 
-    def run():
+    def run(self):
         """
-        1. check current time
-          1.1. see if task need to be run (might be outside trading window?)
-          1.2. see if past closing price need to be loaded
-        2. get most recent price
-        3. check for price movement
-        4. check if movement beyond threshold, get news (if specified)
-        5. if 4 is true, send message
+        1. get most recent quote
+        2. check for price movement
+        3. check if movement beyond threshold, get news (if specified)
+        4. if 3 is true, send message
         """
-        raise NotImplementedError
-    
-    def load_last_day_close():
-        raise NotImplementedError
+        logger.info(f"checking price for {self._ticker}")
+        self._quote = self.load_quote(self._ticker, self._api_key)
+        if self.is_alert_move(self._quote, self._threshold):
+            self.send_alert()
+        else:
+            logger.info(f"no alert-worthy movements observed for {self._ticker}")
 
-    def get_current_price():
-        """ query for last close price (last minute)
-            and compare against previous close
+    @staticmethod
+    def load_quote(ticker, api_key) -> QuoteData:
+        """ check finnhub API: https://finnhub.io/docs/api#quote
         """
-        raise NotImplementedError
-    
-    def get_news_for_ticker():
-        raise NotImplementedError
+        r = requests.get(
+            f"https://finnhub.io/api/v1/quote?symbol={ticker}&token={api_key}"
+        )
+        r.raise_for_status()
+        quote_data = r.json()
+        quote_data["dt"] = dt.datetime.utcfromtimestamp(
+            quote_data["t"]
+        )  # convert unix time to datetime object
+        quote_data["previous_close"] = quote_data["pc"]
+        quote_data["current"] = quote_data["c"]
+        quote_data["move"] = quote_data["c"] / quote_data["pc"] - 1
+        quote = QuoteData(
+            **{k: v for k, v in quote_data.items() if k in QuoteData._fields}
+        )
+        logger.info(f"loaded quote: {quote}")
+        return quote
 
-    def send_alert():
-        raise NotImplementedError
+    @staticmethod
+    def is_alert_move(quote: QuoteData, threshold: float) -> bool:
+        move_frac = abs(quote.current - quote.previous_close) / quote.previous_close
+        return move_frac >= threshold
 
+    @staticmethod
+    def _make_quote_message(quote: QuoteData, ticker: str):
+        return f"{ticker} {'🔻' if quote.move < 0 else '🔺'} {quote.move:.1%}, ${quote.previous_close}->${quote.current}\n"
+
+    @staticmethod
+    def load_news(ticker, api_key) -> List[NewsData]:
+        """ retrieves all the news on the day
+        """
+        day = dt.date.today().strftime("%Y-%m-%d")
+        r = requests.get(
+            f"https://finnhub.io/api/v1/company-news?symbol={ticker}&token={api_key}&from={day}&to={day}"
+        )
+        r.raise_for_status()
+        news_data = r.json()
+        news = []
+        for data in news_data:
+            data["dt"] = dt.datetime.utcfromtimestamp(data["datetime"])
+            news.append(
+                NewsData(**{k: v for k, v in data.items() if k in NewsData._fields})
+            )
+        logger.info(f"loaded {len(news)} news")
+        return news
+
+    @staticmethod
+    def _format_news(news: List[NewsData]):
+        if not news:
+            return "No news is new."
+        msg = "Headlines:\n"
+        for n in sorted(news, key=lambda x: x.dt):
+            msg += f"{n.dt}: {n.headline}\n"
+        return msg
+
+    def _get_fresh_news(self, news: List[NewsData]):
+        """ cache news and return news message
+        """
+        fresh_news = []
+        for n in news:
+            if n.id in self._news_cache:
+                continue
+            self._news_cache[n.id] = n
+            fresh_news.append(n)
+        return self._format_news(fresh_news)
+
+    def send_alert(self):
+        msg = self._make_quote_message(self._quote, self._ticker)
+        if self._news_alert:
+            news = self.load_news(self._ticker, self._api_key)
+            msg += self._get_fresh_news(news)
+        self.text_sender.send_message(msg)
 
 
 if __name__ == "__main__":
-    print(1)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format=f"{__name__}[%(levelname)s][%(asctime)s]: %(message)s",
+    )
+    spm = StockPriceMonitor.from_serializable(CONFIG)
+    spm.start()

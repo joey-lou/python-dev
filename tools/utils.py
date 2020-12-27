@@ -1,7 +1,10 @@
 import json
+import logging
 from typing import Dict, NamedTuple
 
 from twilio.rest import Client
+
+logger = logging.getLogger(__name__)
 
 
 class TwilioCreds(NamedTuple):
