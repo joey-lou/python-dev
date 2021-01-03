@@ -180,7 +180,7 @@ class StockPriceMonitor:
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
-        format=f"{__name__}[%(levelname)s][%(asctime)s]: %(message)s",
+        format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s",
     )
     spm = StockPriceMonitor.from_serializable(CONFIG)
     spm.start()

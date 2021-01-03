@@ -45,4 +45,8 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 
 ## Day 36
 - More API exercise
-- check out stock news api 
+- check out stock news api
+
+## Day 37
+- REST API use exercise
+- pixela API, useful interface created for easier interaction, could add UI for better interaction

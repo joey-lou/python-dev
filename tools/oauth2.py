@@ -174,7 +174,7 @@ class Oauth2Runner:
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
-        format=f"{__name__}[%(levelname)s][%(asctime)s]: %(message)s",
+        format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s",
     )
     oauth2_runner = Oauth2Runner.from_json_file()
     oauth2_str = oauth2_runner.generate_oauth2_string()

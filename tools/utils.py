@@ -33,3 +33,16 @@ class TwilioTextSender:
             from_=self._creds.from_number, to=self._creds.to_number, body=message_body,
         )
         logger.info(f"message sent with {message.sid} with status {message.status}")
+
+
+# utility functions
+def read_json_file(file_loc: str):
+    logger.info(f"reading json from {file_loc}")
+    with open(file_loc, "r") as f:
+        return json.load(f)
+
+
+def write_json_file(file_loc: str, json_obj: Dict):
+    logger.info(f"writing to {file_loc}")
+    with open(file_loc, "w") as f:
+        f.write(json.dumps(json_obj, indent=4))
