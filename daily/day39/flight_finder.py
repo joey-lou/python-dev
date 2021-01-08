@@ -5,11 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, List
 
 from tools.consts import KIWI_CREDS, SHEETY_CREDS, TWILIO_CREDS
-from tools.utils import (
-    KiwiHandler,
-    SheetyHandler,
-    TwilioTextSender,
-)
+from tools.utils import KiwiHandler, SheetyHandler, TwilioTextSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)

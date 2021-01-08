@@ -50,3 +50,8 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 37
 - REST API use exercise
 - pixela API, useful interface created for easier interaction, could add UI for better interaction
+
+## Day 39
+- More API use
+- Combining multiple APIs to make cheap flight alert
+- Sheety handler added

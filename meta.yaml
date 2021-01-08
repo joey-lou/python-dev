@@ -10,17 +10,15 @@ source:
   git_depth: -1
 
 requirements:
-  build:
-    python=3.7.9
-    autoflake
-    black
-    invoke=1.4.1
-    isort=5.6.*
-    click=7.1.*
   develop:
-    jupyterlab
+    - python={{ python }}
+    - autoflake
+    - black
+    - invoke=1.4.1
+    - isort=5.6.*
+    - click=7.1.*
+    - jupyterlab
   run:
-    twilio
-    pydantic=1.7.3
-    requests=2.25.0
-
+    - twilio
+    - pydantic=1.7.3
+    - requests=2.25.0
