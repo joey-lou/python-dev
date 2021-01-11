@@ -55,3 +55,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 - More API use
 - Combining multiple APIs to make cheap flight alert
 - Sheety handler added
+
+## Day 45
+- Revisit beautifulsoup
+- Added project setup tools (`inv bootstrap` for downloading dependency package)
