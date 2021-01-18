@@ -2,12 +2,12 @@ import datetime as dt
 import json
 import logging
 import os
-import time
 from typing import Dict, List, NamedTuple
 
 import requests
 
 from tools.consts import FINNHUB_CREDS, TWILIO_CREDS
+from tools.services import SynchronousService
 from tools.utils import TwilioTextSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
@@ -17,7 +17,7 @@ CONFIG = {
     "cred_loc": FINNHUB_CREDS,
     "ticker": "AAPL",
     "twilio_loc": TWILIO_CREDS,
-    "threshold": 0.005,
+    "threshold": 0.03,
 }
 
 
@@ -36,7 +36,7 @@ class NewsData(NamedTuple):
     url: str
 
 
-class StockPriceMonitor:
+class StockPriceMonitor(SynchronousService):
     """ Monitor stock movements during day since last closing price
         If price dips or rises beyond threshold, alert user with most recent news
 
@@ -47,7 +47,6 @@ class StockPriceMonitor:
             and send updated news
     """
 
-    DEFAULT_INTERVAL = 3600  # default to hourly update
     DEFAULT_THRESHOLD = 0.03
 
     def __init__(
@@ -77,15 +76,6 @@ class StockPriceMonitor:
         threshold = config.get("threshold") or cls.DEFAULT_THRESHOLD
         return cls(ticker, api_key, text_sender, news_alert, threshold)
 
-    def start(self, interval: int = DEFAULT_INTERVAL):
-        """ simply invoke run and go to sleep until time is up
-        """
-        logger.info(f"starting {self.__class__.__name__}")
-        while True:
-            self.run()
-            logger.info(f"sleeping for {interval}")
-            time.sleep(interval)
-
     def run(self):
         """
         1. get most recent quote
@@ -99,6 +89,10 @@ class StockPriceMonitor:
             self.send_alert()
         else:
             logger.info(f"no alert-worthy movements observed for {self._ticker}")
+
+    def stop(self):
+        # no state to cleanup, simply exit program
+        quit()
 
     @staticmethod
     def load_quote(ticker, api_key) -> QuoteData:

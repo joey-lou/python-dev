@@ -1,16 +1,36 @@
 # use invoke and jinja template to automatically build environment
 
 
+import re
 from platform import python_version
 
+from invoke import UnexpectedExit, task
+
+
+def parse_failed_packages(stderr: str):
+    matches = re.findall(
+        r"current channels:\s*((?:- |\w+=*[1-9\.]*)+)\s*Current channels",
+        stderr.replace("\n", ""),
+    )[0]
+    return matches.rsplit("- ")[1:]
+
+
 # use invoke to clean code
-from invoke import task
-
-
 @task(help="installs all dependency packages")
 def bootstrap(ctx, python=python_version()):
     def install(*packages):
-        ctx.run("conda install -qy " + " ".join(packages), echo=True)
+        try:
+            ctx.run(f"conda install {' '.join(packages)}", echo=True)
+        except UnexpectedExit as e:
+            if "PackagesNotFoundError" in e.result.stderr:
+                failed_packages = parse_failed_packages(e.result.stderr)
+                ctx.run(
+                    f"conda install {' '.join(set(packages) - set(failed_packages))} ",
+                    echo=True,
+                )
+                ctx.run(f"pip install {' '.join(failed_packages)}", echo=True)
+            else:
+                raise e
 
     try:
         import jinja2

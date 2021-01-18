@@ -1,4 +1,3 @@
-import datetime as dt
 import json
 import logging
 from typing import Dict, List, Optional
@@ -25,10 +24,6 @@ class Sheet(BaseModel):
 class SheetyCreds(BaseModel):
     token: str
     sheets: Dict[str, Sheet]
-
-
-class KiwiCreds(BaseModel):
-    api_key: str
 
 
 # utility functions
@@ -108,56 +103,3 @@ class SheetyHandler:
             sheet, sub_sheet, self._creds.sheets[sheet].url, self._creds.token, row
         )
         logger.info(f"row {row} added to {sheet}/{sub_sheet} with response {response}")
-
-
-class KiwiHandler:
-    """ uses KIWI API to query for flights
-        https://tequila.kiwi.com/portal/docs/tequila_api/search_api
-    """
-
-    def __init__(self, creds: Dict):
-        self._creds: KiwiCreds = KiwiCreds(**creds)
-
-    @classmethod
-    def from_json(cls, file_loc: str):
-        return cls(read_json_file(file_loc))
-
-    @staticmethod
-    def search_flight(
-        api_key: str,
-        start_date: dt.date,
-        end_date: dt.date,
-        from_airport: str,
-        to_airport: str,
-        search_by_city: bool,
-        currency: str,
-    ):
-        from_airport = f"{'city:' if search_by_city else ''}{from_airport}"
-        to_airport = f"{'city:' if search_by_city else ''}{to_airport}"
-        get_url = f"https://tequila-api.kiwi.com/v2/search?curr={currency}&fly_from={from_airport}&fly_to={to_airport}&dateFrom={start_date:%d/%m/%Y}&dateTo={end_date:%d/%m/%Y}"
-        r = requests.get(url=get_url, headers={"apikey": api_key})
-        r.raise_for_status()
-        response = json.loads(r.text)
-        logger.info(f"queried flight with params {response['search_params']}")
-        return response["data"]
-
-    def flight_next_n_months(
-        self,
-        from_airport: str,
-        to_airport: str,
-        n: int = 3,
-        start_date: Optional[dt.date] = None,
-        search_by_city: bool = True,
-        currency: str = "USD",
-    ):
-        start_date = start_date or dt.date.today()
-        end_date = start_date + dt.timedelta(days=n * 30)
-        return self.search_flight(
-            self._creds.api_key,
-            start_date,
-            end_date,
-            from_airport,
-            to_airport,
-            search_by_city,
-            currency,
-        )

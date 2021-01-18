@@ -1,14 +1,77 @@
 import datetime as dt
+import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, NamedTuple, Optional
+
+import requests
 
 from tools.consts import KIWI_CREDS, SHEETY_CREDS, TWILIO_CREDS
-from tools.utils import KiwiHandler, SheetyHandler, TwilioTextSender
+from tools.utils import SheetyHandler, TwilioTextSender, read_json_file
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
+
+# ~~~~~~~~~~~~~~~~ KIWI handler ~~~~~~~~~~~~~~~~~~
+class KiwiCreds(NamedTuple):
+    api_key: str
+
+
+class KiwiHandler:
+    """ uses KIWI API to query for flights
+        https://tequila.kiwi.com/portal/docs/tequila_api/search_api
+    """
+
+    def __init__(self, creds: Dict):
+        self._creds: KiwiCreds = KiwiCreds(**creds)
+
+    @classmethod
+    def from_json(cls, file_loc: str):
+        return cls(read_json_file(file_loc))
+
+    @staticmethod
+    def search_flight(
+        api_key: str,
+        start_date: dt.date,
+        end_date: dt.date,
+        from_airport: str,
+        to_airport: str,
+        search_by_city: bool,
+        currency: str,
+    ):
+        from_airport = f"{'city:' if search_by_city else ''}{from_airport}"
+        to_airport = f"{'city:' if search_by_city else ''}{to_airport}"
+        get_url = f"https://tequila-api.kiwi.com/v2/search?curr={currency}&fly_from={from_airport}&fly_to={to_airport}&dateFrom={start_date:%d/%m/%Y}&dateTo={end_date:%d/%m/%Y}"
+        r = requests.get(url=get_url, headers={"apikey": api_key})
+        r.raise_for_status()
+        response = json.loads(r.text)
+        logger.info(f"queried flight with params {response['search_params']}")
+        return response["data"]
+
+    def flight_next_n_months(
+        self,
+        from_airport: str,
+        to_airport: str,
+        n: int = 3,
+        start_date: Optional[dt.date] = None,
+        search_by_city: bool = True,
+        currency: str = "USD",
+    ):
+        start_date = start_date or dt.date.today()
+        end_date = start_date + dt.timedelta(days=n * 30)
+        return self.search_flight(
+            self._creds.api_key,
+            start_date,
+            end_date,
+            from_airport,
+            to_airport,
+            search_by_city,
+            currency,
+        )
+
+
+# ~~~~~~~~~~~~~~~~ Flight Finder Application ~~~~~~~~~~~~~~~~~~
 
 
 @dataclass

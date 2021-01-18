@@ -11,15 +11,16 @@ source:
 
 requirements:
   develop:
-    - python={{ python }}
+    - python=={{ python }}
     - autoflake
     - black
-    - invoke=1.4.1
-    - isort=5.6.*
-    - click=7.1.*
+    - invoke==1.4.1
+    - isort==5.6.*
+    - click==7.1.*
     - jupyterlab
   run:
     - twilio
-    - pydantic=1.7.3
-    - requests=2.25.0
-    - bs4=4.9.3
+    - pydantic==1.7.3
+    - requests==2.25.0
+    - bs4==4.9.3
+    - spotipy
