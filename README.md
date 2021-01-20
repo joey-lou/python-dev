@@ -62,5 +62,9 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 
 ## Day 46
 - More web scraping
-- Create spotify app to make playlist from scraped data
+- Create spotify app to make playlist from scraped data (Jazz music)
 - Add pip install in case conda channel fails in `inv bootstrap`
+
+## Day 47
+- More web scraping
+- Check for PS5 availability from bestbuy

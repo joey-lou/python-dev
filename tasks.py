@@ -17,7 +17,10 @@ def parse_failed_packages(stderr: str):
 
 # use invoke to clean code
 @task(help="installs all dependency packages")
-def bootstrap(ctx, python=python_version()):
+def bootstrap(ctx, python=python_version(), pip=False):
+    def install_with_pip(*packages):
+        ctx.run(f"pip install {' '.join(packages)}", echo=True)
+
     def install(*packages):
         try:
             ctx.run(f"conda install {' '.join(packages)}", echo=True)
@@ -28,15 +31,18 @@ def bootstrap(ctx, python=python_version()):
                     f"conda install {' '.join(set(packages) - set(failed_packages))} ",
                     echo=True,
                 )
+                install_with_pip(failed_packages)
                 ctx.run(f"pip install {' '.join(failed_packages)}", echo=True)
             else:
                 raise e
+
+    install_func = install_with_pip if pip else install
 
     try:
         import jinja2
         import yaml
     except ModuleNotFoundError:
-        install("jinja2", "pyyaml")
+        install_func("jinja2", "pyyaml")
         import jinja2
         import yaml
 
@@ -46,7 +52,7 @@ def bootstrap(ctx, python=python_version()):
     meta_yaml = yaml.safe_load(template.render(python=python))
     dev_packages = meta_yaml["requirements"]["develop"]
     run_packages = meta_yaml["requirements"]["run"]
-    install(*dev_packages, *run_packages)
+    install_func(*dev_packages, *run_packages)
 
 
 @task(aliases=["fmt"])
