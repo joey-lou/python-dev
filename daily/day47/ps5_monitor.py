@@ -3,6 +3,7 @@ import os
 
 import requests
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 
 from tools.consts import TWILIO_CREDS
 from tools.services import SynchronousService
@@ -30,7 +31,11 @@ class PlayStationMonitor(SynchronousService):
 
     def run(self):
         for site, (check_func, web_address) in self._site_map.items():
-            status = check_func(self)
+            try:
+                status = check_func(self)
+            except Exception as e:
+                logger.error(e)
+                continue
             if status:
                 msg = f"{site} has available playstation 5 for order!\nGo to: {web_address}"
                 logger.info(msg)
@@ -46,11 +51,13 @@ class PlayStationMonitor(SynchronousService):
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36",
+            "User-Agent": UserAgent().chrome,
         }
 
     def _check_bestbuy(self):
-        response = requests.get(self.BESTBUY, headers=self._request_headers())
+        response = requests.get(
+            self.BESTBUY, headers=self._request_headers(), timeout=1
+        )
         soup = BeautifulSoup(response.text, "html.parser")
         buy_button = soup.find_all("button", attrs={"data-sku-id": 6426149})[0]
         if "sold out" == buy_button.text.lower():
@@ -58,7 +65,7 @@ class PlayStationMonitor(SynchronousService):
         return True
 
     def _check_amazon(self):
-        response = requests.get(self.AMAZON, headers=self._request_headers())
+        response = requests.get(self.AMAZON, headers=self._request_headers(), timeout=1)
         soup = BeautifulSoup(response.text, "html.parser")
         availability = soup.find_all("div", id="availability")[0]
         if "unavailable" in availability.text.lower():
