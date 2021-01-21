@@ -9,10 +9,10 @@ from invoke import UnexpectedExit, task
 
 def parse_failed_packages(stderr: str):
     matches = re.findall(
-        r"current channels:\s*((?:- |\w+=*[1-9\.]*)+)\s*Current channels",
+        r"current channels:\s*((?:- |\w+=*[1-9\.\*]*\s*?)+)\s*Current channels",
         stderr.replace("\n", ""),
     )[0]
-    return matches.rsplit("- ")[1:]
+    return [p.strip() for p in matches.rsplit("- ")[1:]]
 
 
 # use invoke to clean code

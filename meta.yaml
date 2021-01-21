@@ -21,7 +21,7 @@ requirements:
     - twilio
     - pydantic==1.7.3
     - requests==2.25.0
-    - bs4==4.9.3
+    - beautifulsoup4==4.9.3
     - spotipy
     - selenium
     - fake_useragent
