@@ -24,3 +24,4 @@ requirements:
     - bs4==4.9.3
     - spotipy
     - selenium
+    - fake_useragent
