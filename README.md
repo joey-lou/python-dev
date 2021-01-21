@@ -68,3 +68,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 47
 - More web scraping
 - Check for PS5 availability from bestbuy
+
+## Day 48
+- Scrape web using selenium driver
+- Setup scrap job on aws

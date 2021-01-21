@@ -28,11 +28,10 @@ def bootstrap(ctx, python=python_version(), pip=False):
             if "PackagesNotFoundError" in e.result.stderr:
                 failed_packages = parse_failed_packages(e.result.stderr)
                 ctx.run(
-                    f"conda install {' '.join(set(packages) - set(failed_packages))} ",
+                    f"conda install {' '.join(set(packages) - set(failed_packages))} -y",
                     echo=True,
                 )
-                install_with_pip(failed_packages)
-                ctx.run(f"pip install {' '.join(failed_packages)}", echo=True)
+                install_with_pip(*failed_packages)
             else:
                 raise e
 
