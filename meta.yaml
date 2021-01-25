@@ -17,6 +17,7 @@ requirements:
     - isort==5.6.*
     - click==7.1.*
     - jupyterlab
+    - pylint
   run:
     - twilio
     - pydantic==1.7.3

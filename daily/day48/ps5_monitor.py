@@ -4,7 +4,7 @@ import os
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-from tools.consts import TWILIO_CREDS
+from tools.consts import CHROME_DRIVER_PATH, TWILIO_CREDS
 from tools.services import SynchronousService
 from tools.utils import TwilioTextSender
 
@@ -23,7 +23,7 @@ class PlayStationMonitor(SynchronousService):
         "https://www.amazon.com/PlayStation-5-Console/dp/B08FC5L3RG?ref_=ast_sto_dp"
     )
 
-    DEFAULT_PATH = "/Users/joeylou/Development/chromedriver"
+    DEFAULT_PATH = CHROME_DRIVER_PATH
 
     def __init__(
         self, twilio_sender: TwilioTextSender, chrome_driver_path: str = DEFAULT_PATH
