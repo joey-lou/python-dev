@@ -1,10 +1,13 @@
+import logging
 from functools import wraps
+from random import randint
 
 from flask import Flask
 
 app = Flask(__name__)
-
-secret = 9
+logger = logging.getLogger(__name__)
+secret = randint(0, 9)
+logger.info(f"Secret number is {secret}!")
 
 
 def html_style(style: str):
@@ -49,8 +52,14 @@ def menu(number):
         return (
             'Too low <img src="https://media.giphy.com/media/jD4DwBtqPXRXa/giphy.gif"/>'
         )
-    return 'Right! <img src="https://media.giphy.com/media/4T7e4DmcrP9du/giphy.gif"/>'
+    return (
+        'Right! <img src="https://media.giphy.com/media/xTiTnf9SCIVk8HIvE4/giphy.gif"/>'
+    )
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format=f"{__name__}[%(levelname)s][%(asctime)s]: %(message)s",
+    )
     app.run(debug=True)

@@ -18,6 +18,7 @@ requirements:
     - click==7.1.*
     - jupyterlab
     - pylint
+    - flask
   run:
     - twilio
     - pydantic==1.7.3

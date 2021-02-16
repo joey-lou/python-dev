@@ -76,3 +76,17 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 
 ## Webscrape Capstone
 - Google search result analytics (TODO)
+
+
+## Day 54
+- Flask framework quickstart
+- Decorator review
+
+## Day 55
+- Flask sample project
+- Render simple html with flask and use route to access different pages
+- Number guessing with cute dog pics
+
+## Day 56
+- Flask serve static html
+- Personal card site (static)
