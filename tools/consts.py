@@ -1,9 +1,13 @@
-# credential locations, relative to parent working directory
-OPENWEATHER_CREDS = "./secret/openweather_creds.json"
-TWILIO_CREDS = "./secret/twilio_creds.json"
-FINNHUB_CREDS = "./secret/finnhub_creds.json"
-PIXELA_CREDS = "./secret/pixela_creds.json"
-SHEETY_CREDS = "./secret/sheety_creds.json"
-KIWI_CREDS = "./secret/kiwi_creds.json"
-SPOTIFY_CREDS = "./secret/spotify_creds.json"
+import os
+
+file_dir = os.path.dirname(__file__)
+ROOT_DIR = os.path.join(file_dir, "..", "secret")
+OPENWEATHER_CREDS = os.path.join(ROOT_DIR, "openweather_creds.json")
+TWILIO_CREDS = os.path.join(ROOT_DIR, "twilio_creds.json")
+FINNHUB_CREDS = os.path.join(ROOT_DIR, "finnhub_creds.json")
+PIXELA_CREDS = os.path.join(ROOT_DIR, "pixela_creds.json")
+SHEETY_CREDS = os.path.join(ROOT_DIR, "sheety_creds.json")
+KIWI_CREDS = os.path.join(ROOT_DIR, "kiwi_creds.json")
+SPOTIFY_CREDS = os.path.join(ROOT_DIR, "spotify_creds.json")
+# chrom dirver needs to be installed manually
 CHROME_DRIVER_PATH = "/Users/joeylou/Development/chromedriver"

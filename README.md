@@ -90,3 +90,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 56
 - Flask serve static html
 - Personal card site (static)
+
+## Day 57
+- Flask static site with Jinja templating
+- Demo blog site
