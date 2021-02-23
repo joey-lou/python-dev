@@ -94,3 +94,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 57
 - Flask static site with Jinja templating
 - Demo blog site
+
+## Day 59
+- Clean and more responsive blog site with bootstrap
+- Hosted using jinja again
