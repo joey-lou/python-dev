@@ -98,3 +98,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 59
 - Clean and more responsive blog site with bootstrap
 - Hosted using jinja again
+
+## Day 60
+- Jinja Post request
+- Add email component to post response
