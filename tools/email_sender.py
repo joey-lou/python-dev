@@ -4,7 +4,11 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 from .oauth2 import Oauth2Runner
+from .utils import SendGridCreds
 
 logger = logging.getLogger(__name__)
 
@@ -73,3 +77,24 @@ class GmailSender(EmailSender):
         logger.info("disconnecting gmail sender")
         self.oauth2.save_cred_to_file()  # auto-update cred file
         self.server.quit()
+
+
+class GridSender(EmailSender):
+    def __init__(self, send_grid_api_key: str):
+        self.grid_cred = SendGridCreds(api_key=send_grid_api_key)
+
+
+message = Mail(
+    from_email="from_email@example.com",
+    to_emails="to@example.com",
+    subject="Sending with Twilio SendGrid is Fun",
+    html_content="<strong>and easy to do anywhere, even with Python</strong>",
+)
+try:
+    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    response = sg.send(message)
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
+except Exception as e:
+    print(e.message)

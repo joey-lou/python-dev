@@ -1,17 +1,19 @@
 import datetime as dt
-import json
 import logging
 import os
 from typing import List, NamedTuple
 
 import requests
-from twilio.rest import Client
 
 from tools.consts import OPENWEATHER_CREDS, TWILIO_CREDS
-from tools.utils import TwilioCreds, TwilioTextSender
+from tools.utils import BaseCreds, TwilioTextSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
+
+
+class WeatherCreds(BaseCreds):
+    api_key: str
 
 
 class WeatherData(NamedTuple):
@@ -42,29 +44,19 @@ class WeatherAlerter:
         self._lat: float = _lat
         self._lon: float = _lon
         self._hour: int = hour
-        self._weather_api_key: str = self._load_weather_creds(open_weather_creds_loc)
 
-        self.text_sender = TwilioTextSender.from_json(twilio_creds_loc)
+        self._weather_creds: WeatherCreds = WeatherCreds.from_json_file(
+            open_weather_creds_loc
+        )
 
-    @staticmethod
-    def _make_twilio_client(twilio_creds: TwilioCreds):
-        return Client(twilio_creds.account_sid, twilio_creds.auth_token)
-
-    @staticmethod
-    def _load_weather_creds(cred_loc: str):
-        with open(cred_loc, "r") as fp:
-            return json.load(fp)["key"]
-
-    @staticmethod
-    def _load_twilio_creds(cred_loc: str) -> TwilioCreds:
-        with open(cred_loc, "r") as fp:
-            creds = json.load(fp)
-            return TwilioCreds(**creds)
+        self.text_sender = TwilioTextSender.from_creds_file(twilio_creds_loc)
 
     def query_hourly_weather(self):
         skip_part = ",".join(["current", "minutely", "daily"])
         response = requests.get(
-            f"https://api.openweathermap.org/data/2.5/onecall?lat={self._lat}&lon={self._lon}&exclude={skip_part}&appid={self._weather_api_key}&units=metric"
+            f"https://api.openweathermap.org/data/2.5/onecall?lat={self._lat}"
+            f"&lon={self._lon}&exclude={skip_part}"
+            f"&appid={self._weather_creds.api_key}&units=metric"
         )
         response.raise_for_status()
         hourly_data = response.json()["hourly"]

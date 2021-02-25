@@ -102,6 +102,6 @@ if __name__ == "__main__":
         level=logging.INFO,
         format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s",
     )
-    psm = PlayStationMonitor(TwilioTextSender.from_json(TWILIO_CREDS))
+    psm = PlayStationMonitor(TwilioTextSender.from_creds_file(TWILIO_CREDS))
     psm.start()
     psm.stop()

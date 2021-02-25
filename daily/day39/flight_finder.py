@@ -3,18 +3,18 @@ import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List, NamedTuple, Optional
+from typing import Dict, List, Optional
 
 import requests
 
 from tools.consts import KIWI_CREDS, SHEETY_CREDS, TWILIO_CREDS
-from tools.utils import SheetyHandler, TwilioTextSender, read_json_file
+from tools.utils import BaseCreds, SheetyHandler, TwilioTextSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
 
 # ~~~~~~~~~~~~~~~~ KIWI handler ~~~~~~~~~~~~~~~~~~
-class KiwiCreds(NamedTuple):
+class KiwiCreds(BaseCreds):
     api_key: str
 
 
@@ -23,12 +23,12 @@ class KiwiHandler:
         https://tequila.kiwi.com/portal/docs/tequila_api/search_api
     """
 
-    def __init__(self, creds: Dict):
-        self._creds: KiwiCreds = KiwiCreds(**creds)
+    def __init__(self, kiwi_creds: KiwiCreds):
+        self._creds: KiwiCreds = kiwi_creds
 
     @classmethod
-    def from_json(cls, file_loc: str):
-        return cls(read_json_file(file_loc))
+    def from_creds_file(cls, file_loc: str):
+        return cls(KiwiCreds.from_json_file(file_loc))
 
     @staticmethod
     def search_flight(
@@ -162,8 +162,8 @@ if __name__ == "__main__":
         format=f"{APP_NAME}[%(levelname)s][%(asctime)s]: %(message)s",
     )
     cff = CheapFlightFinder(
-        SheetyHandler.from_json(SHEETY_CREDS),
-        TwilioTextSender.from_json(TWILIO_CREDS),
-        KiwiHandler.from_json(KIWI_CREDS),
+        SheetyHandler.from_creds_file(SHEETY_CREDS),
+        TwilioTextSender.from_creds_file(TWILIO_CREDS),
+        KiwiHandler.from_creds_file(KIWI_CREDS),
     )
     cff.run()

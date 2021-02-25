@@ -1,5 +1,4 @@
 import datetime as dt
-import json
 import logging
 import os
 from typing import Dict, List, NamedTuple
@@ -8,15 +7,20 @@ import requests
 
 from tools.consts import FINNHUB_CREDS, TWILIO_CREDS
 from tools.services import SynchronousService
-from tools.utils import TwilioTextSender
+from tools.utils import BaseCreds, TwilioTextSender
 
 APP_NAME = os.path.basename(__file__).replace(".py", "")
 logger = logging.getLogger(APP_NAME)
 
+
+class FinnhubCreds(BaseCreds):
+    api_key: str
+
+
 CONFIG = {
-    "cred_loc": FINNHUB_CREDS,
-    "ticker": "AAPL",
-    "twilio_loc": TWILIO_CREDS,
+    "finnhub_creds_loc": FINNHUB_CREDS,
+    "ticker": "TSLA",
+    "twilio_creds_loc": TWILIO_CREDS,
     "threshold": 0.03,
 }
 
@@ -52,14 +56,14 @@ class StockPriceMonitor(SynchronousService):
     def __init__(
         self,
         ticker: str,
-        api_key: str,
+        finnhub_creds: FinnhubCreds,
         text_sender: TwilioTextSender,
         news_alert: bool = True,
         threshold: float = DEFAULT_THRESHOLD,
     ):
         self.text_sender = text_sender
         self._ticker = ticker
-        self._api_key = api_key
+        self._creds = finnhub_creds
         self._quote = None
         self._threshold = threshold
         self._news_alert = news_alert
@@ -67,14 +71,12 @@ class StockPriceMonitor(SynchronousService):
 
     @classmethod
     def from_serializable(cls, config: Dict):
-        with open(config["cred_loc"], "r") as fp:
-            creds = json.load(fp)
-            api_key = creds["api_key"]
         ticker = config["ticker"]
-        text_sender = TwilioTextSender.from_json(config["twilio_loc"])
+        finnhub_creds = FinnhubCreds.from_json_file(config["finnhub_creds_loc"])
+        text_sender = TwilioTextSender.from_creds_file(config["twilio_creds_loc"])
         news_alert = config.get("news_alert") or True
         threshold = config.get("threshold") or cls.DEFAULT_THRESHOLD
-        return cls(ticker, api_key, text_sender, news_alert, threshold)
+        return cls(ticker, finnhub_creds, text_sender, news_alert, threshold)
 
     def run(self):
         """
@@ -84,7 +86,7 @@ class StockPriceMonitor(SynchronousService):
         4. if 3 is true, send message
         """
         logger.info(f"checking price for {self._ticker}")
-        self._quote = self.load_quote(self._ticker, self._api_key)
+        self._quote = self.load_quote(self._ticker, self._creds.api_key)
         if self.is_alert_move(self._quote, self._threshold):
             self.send_alert()
         else:
@@ -166,7 +168,7 @@ class StockPriceMonitor(SynchronousService):
     def send_alert(self):
         msg = self._make_quote_message(self._quote, self._ticker)
         if self._news_alert:
-            news = self.load_news(self._ticker, self._api_key)
+            news = self.load_news(self._ticker, self._creds.api_key)
             msg += self._get_fresh_news(news)
         self.text_sender.send_message(msg)
 

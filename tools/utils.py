@@ -9,11 +9,35 @@ from twilio.rest import Client
 logger = logging.getLogger(__name__)
 
 
-class TwilioCreds(BaseModel):
+class BaseCreds(BaseModel):
+    @classmethod
+    def from_dict(cls, cred_dict: dict):
+        return cls(**{k: v for k, v in cred_dict.items() if k in cls.__fields__})
+
+    def as_dict(self):
+        return self.__dict__
+
+    @classmethod
+    def from_json_file(cls, file_loc: str):
+        logger.info(f"loading {cls.__name__} from {file_loc}")
+        with open(file_loc, "r") as f:
+            return cls.from_dict(json.load(f))
+
+    def write_json_file(self, file_loc: str):
+        logger.info(f"writing {self.__class__.__name__} to {file_loc}")
+        with open(file_loc, "w") as f:
+            f.write(json.dumps(self.as_dict(), indent=4))
+
+
+class TwilioCreds(BaseCreds):
     account_sid: str
     auth_token: str
     from_number: str
     to_number: str
+
+
+class SendGridCreds(BaseCreds):
+    api_key: str
 
 
 class Sheet(BaseModel):
@@ -21,7 +45,7 @@ class Sheet(BaseModel):
     sub_sheets: List[str]
 
 
-class SheetyCreds(BaseModel):
+class SheetyCreds(BaseCreds):
     token: str
     sheets: Dict[str, Sheet]
 
@@ -43,13 +67,13 @@ class TwilioTextSender:
     """ uses Twilio API to send simple text messages to oneself
     """
 
-    def __init__(self, creds: Dict):
-        self._creds: TwilioCreds = TwilioCreds(**creds)
+    def __init__(self, twilio_creds: TwilioCreds):
+        self._creds: TwilioCreds = twilio_creds
         self.client = Client(self._creds.account_sid, self._creds.auth_token)
 
     @classmethod
-    def from_json(cls, file_loc: str):
-        return cls(read_json_file(file_loc))
+    def from_creds_file(cls, file_loc: str):
+        return cls(TwilioCreds.from_json_file(file_loc))
 
     def send_message(self, message_body: str):
         message = self.client.messages.create(
@@ -62,12 +86,12 @@ class SheetyHandler:
     """ uses sheety API to manage linked google sheets
     """
 
-    def __init__(self, creds: Dict):
-        self._creds: SheetyCreds = SheetyCreds(**creds)
+    def __init__(self, sheety_creds: SheetyCreds):
+        self._creds: SheetyCreds = sheety_creds
 
     @classmethod
-    def from_json(cls, file_loc: str):
-        return cls(read_json_file(file_loc))
+    def from_creds_file(cls, file_loc: str):
+        return cls(SheetyCreds.from_json_file(file_loc))
 
     def _get_all_subsheets(self, sheet: str):
         """ assume sheet exist, KeyError will be raised if main sheet is not found
