@@ -80,21 +80,28 @@ class GmailSender(EmailSender):
 
 
 class GridSender(EmailSender):
-    def __init__(self, send_grid_api_key: str):
-        self.grid_cred = SendGridCreds(api_key=send_grid_api_key)
+    def __init__(self, send_grid_creds: SendGridCreds):
+        self._creds = send_grid_creds
+        self._client = SendGridAPIClient(self._creds.api_key)
 
+    @classmethod
+    def from_creds_file(cls, file_loc: str):
+        return cls(SendGridCreds.from_json_file(file_loc))
 
-message = Mail(
-    from_email="from_email@example.com",
-    to_emails="to@example.com",
-    subject="Sending with Twilio SendGrid is Fun",
-    html_content="<strong>and easy to do anywhere, even with Python</strong>",
-)
-try:
-    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-    response = sg.send(message)
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
-except Exception as e:
-    print(e.message)
+    def connect(self):
+        pass
+
+    def disconnect(self):
+        pass
+
+    def send(self, to_emails: Optional[List[str]], subject: str, html_content: str):
+        from_email = self._creds.from_email
+        to_emails = to_emails or [from_email]
+        message = Mail(
+            from_email=from_email,
+            to_emails=to_emails,
+            subject=subject,
+            html_content=html_content,
+        )
+        response = self._client.send(message)
+        logger.info(f"Response returned status code: {response.status_code}")

@@ -7,7 +7,8 @@ from typing import Dict
 
 from flask import Flask, render_template, request
 
-from tools.email_sender import GmailSender
+from tools.consts import GRID_CREDS
+from tools.email_sender import GmailSender, GridSender
 
 ROOT_PATH = os.path.dirname(__file__)
 STATIC_PATH = os.path.join(ROOT_PATH, "../day59/static")  # share same static files
@@ -30,15 +31,8 @@ def blog_post(blog_id):
     )
 
 
-def send_email(form: Dict):
-    with GmailSender() as gsender:
-        # send to my own gmail account
-        my_email = gsender.oauth2.username
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"Blog Message from {form['name']}"
-        msg["To"] = my_email
-
-        html = f"""\
+def make_email_html(form: Dict):
+    return f"""\
         <html>
         <head></head>
         <body>
@@ -50,8 +44,26 @@ def send_email(form: Dict):
         </body>
         </html>
         """
+
+
+def send_email(form: Dict):
+    with GmailSender() as gsender:
+        # send to my own gmail account
+        my_email = gsender.oauth2.username
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"Blog Message from {form['name']}"
+        msg["To"] = my_email
+
+        html = make_email_html(form)
+
         msg.attach(MIMEText(html, "html"))
         gsender.send([my_email], msg.as_string())
+
+
+def send_email_with_grid(form: Dict):
+    html = make_email_html(form)
+    with GridSender.from_creds_file(GRID_CREDS) as gs:
+        gs.send(None, f"Blog Message from {form['name']}", html)
 
 
 @app.route("/contact", methods=["POST", "GET"])
@@ -60,7 +72,7 @@ def contact():
         logger.info("Received post from contact form")
         form = request.form
         logger.info(f"Form received: {form}")
-        send_email(form)
+        send_email_with_grid(form)
         return render_template("contact.html", contact_sent=True)
     return render_template("contact.html", contact_sent=False)
 

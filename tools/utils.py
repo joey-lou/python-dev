@@ -37,6 +37,7 @@ class TwilioCreds(BaseCreds):
 
 
 class SendGridCreds(BaseCreds):
+    from_email: str
     api_key: str
 
 

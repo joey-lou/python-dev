@@ -9,5 +9,6 @@ PIXELA_CREDS = os.path.join(ROOT_DIR, "pixela_creds.json")
 SHEETY_CREDS = os.path.join(ROOT_DIR, "sheety_creds.json")
 KIWI_CREDS = os.path.join(ROOT_DIR, "kiwi_creds.json")
 SPOTIFY_CREDS = os.path.join(ROOT_DIR, "spotify_creds.json")
+GRID_CREDS = os.path.join(ROOT_DIR, "sendgrid_creds.json")
 # chrom dirver needs to be installed manually
 CHROME_DRIVER_PATH = "/Users/joeylou/Development/chromedriver"
