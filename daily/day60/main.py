@@ -6,6 +6,9 @@ from email.mime.text import MIMEText
 from typing import Dict
 
 from flask import Flask, render_template, request
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired, Email
 
 from tools.consts import GRID_CREDS
 from tools.email_sender import GmailSender, GridSender
@@ -16,7 +19,32 @@ TEMPLATE_PATH = os.path.join(ROOT_PATH, "templates")
 
 APP_NAME = "personal_blog_site"
 app = Flask(APP_NAME, static_folder=STATIC_PATH, template_folder=TEMPLATE_PATH)
+app.secret_key = "ABC"
 logger = logging.getLogger(APP_NAME)
+
+
+class ContactForm(FlaskForm):
+    name = StringField("name", validators=[DataRequired()])
+    email = StringField("email")
+    phone = StringField("phone")
+    message = StringField("message")
+
+
+class LoginForm(FlaskForm):
+    email = StringField(label="Email", validators=[Email()])
+    password = PasswordField(
+        label="Password", validators=[DataRequired(message="Please enter password")]
+    )
+    submit = SubmitField(label="Login")
+
+
+# testing route for example usage of form
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        return f"So you are {request.form['email']}, {request.form['password']}"
+    return render_template("login.html", form=form)
 
 
 @app.route("/")
@@ -85,13 +113,6 @@ def about():
 @app.route("/form")
 def form():
     return render_template("form.html")
-
-
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        return f"So you are {request.form['username']}, {request.form['password']}"
-    return "Hello"
 
 
 fake_blogs = [

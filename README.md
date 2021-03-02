@@ -102,3 +102,8 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 60
 - Jinja Post request
 - Add email component to post response
+
+## Day 61
+- Form validation with WTF forms
+- Modified contact page of day 60 blog
+- Simplify utility handler instantiations, add grid email sender
