@@ -107,3 +107,8 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 - Form validation with WTF forms
 - Modified contact page of day 60 blog
 - Simplify utility handler instantiations, add grid email sender
+
+## Day 63
+- persist web content with sqlite DB
+- example "library" web page
+- add DB related utility tools and example dir for quick script test
