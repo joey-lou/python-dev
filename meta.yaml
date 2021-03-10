@@ -24,6 +24,7 @@ requirements:
     - sendgrid
     - Flask-WTF
     - email_validator
+    - flask-sqlalchemy
     - pydantic==1.7.3
     - requests==2.25.0
     - beautifulsoup4==4.9.3

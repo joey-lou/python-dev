@@ -109,6 +109,10 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 - Simplify utility handler instantiations, add grid email sender
 
 ## Day 63
-- persist web content with sqlite DB
-- example "library" web page
-- add DB related utility tools and example dir for quick script test
+- Persist web content with sqlite DB
+- Example "library" web page
+- Add DB related utility tools and example dir for quick script test
+
+## Day 66
+- Build restful API
+- Purely test via postman
