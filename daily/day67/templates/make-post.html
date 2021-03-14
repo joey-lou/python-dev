@@ -1,0 +1,65 @@
+<!-- Navigation -->
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+<!-- Page Header -->
+{% block header %}
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/edit-bg.jpg')}}')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="page-heading">
+          <h1>Edit Post</h1>
+          <span class="subheading">You're going to make a great blog post!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock %}
+
+<!-- Main Content -->
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+      <!-- <form action="/new-blog" method="post" novalidate> -->
+        <!-- <p>
+          {{ form.title.label }} <br> {{ form.title() }}
+          {% for err in form.title.errors %}
+            <span style="color:red">{{ err }}</span>
+          {% endfor %}
+        </p>
+        <p>
+          {{ form.subtitle.label }} <br> {{ form.subtitle() }}
+          {% for err in form.subtitle.errors %}
+            <span style="color:red">{{ err }}</span>
+          {% endfor %}
+        </p>
+        <p>
+          {{ form.author.label }} <br> {{ form.author() }}
+          {% for err in form.author.errors %}
+            <span style="color:red">{{ err }}</span>
+          {% endfor %}
+        </p>
+        <p>
+          {{ form.img_url.label }} <br> {{ form.img_url() }}
+          {% for err in form.img_url.errors %}
+            <span style="color:red">{{ err }}</span>
+          {% endfor %}
+        </p>
+        <p>
+          {{ form.body.label }} <br> {{ form.body() }}
+          {% for err in form.body.errors %}
+            <span style="color:red">{{ err }}</span>
+          {% endfor %}
+        </p> -->
+        <!-- </form> -->
+      {{ ckeditor.load() }}
+      {{ ckeditor.config(name='body') }}
+      {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+      
+    </div>
+  </div>
+</div>
+{% endblock %}

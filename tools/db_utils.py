@@ -110,6 +110,11 @@ class DBClient(abc.ABC):
 
 
 class SqliteClient(DBClient):
+    """
+    Custom DB client with limited type conversion
+    Existing packages such as sqlachemy provides more functionality
+    """
+
     @classmethod
     def from_db_info(cls, db_info: SqliteInfo):
         return cls(SqliteConnection(db_info))

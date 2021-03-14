@@ -24,6 +24,8 @@ requirements:
     - sendgrid
     - Flask-WTF
     - email_validator
+    - flask-bootstrap
+    - flask-ckeditor
     - flask-sqlalchemy
     - pydantic==1.7.3
     - requests==2.25.0

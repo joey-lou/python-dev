@@ -6,13 +6,13 @@
     <p>
         {{ form.email.label }} <br> {{ form.email(size=20) }}
         {% for err in form.email.errors %}
-        <span styple="color:red">{{ err }}</span>
+        <span style="color:red">{{ err }}</span>
         {% endfor %}
     </p>
     <p>
         {{ form.password.label }} <br> {{ form.password(size=20) }}
-        {% for err in form.email.errors %}
-        <span styple="color:red">{{ err }}</span>
+        {% for err in form.password.errors %}
+        <span style="color:red">{{ err }}</span>
         {% endfor %}
     </p>
     {{ form.submit }}

@@ -1,0 +1,51 @@
+
+
+<!-- Navigation -->
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<!-- Page Header -->
+{% block header %}
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/contact-bg.jpg') }})">
+    <div class="overlay"></div>
+    <div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="page-heading">
+            <h1>Log In</h1>
+            <span class="subheading">Dummy login page.</span>
+        </div>
+        </div>
+    </div>
+    </div>
+</header>
+{% endblock %}
+
+<!-- Main Content -->
+{% block content %}
+<div class="container col-lg-4 col-md-6 mx-auto">
+    {% if not is_logged_in: %}
+    <!-- <form action="/login" method="post" novalidate>
+        {{ form.csrf_token }}
+        <p>
+            {{ form.email.label }} <br> {{ form.email(size=20) }}
+            {% for err in form.email.errors %}
+            <span style="color:red">{{ err }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }} <br> {{ form.password(size=20) }}
+            {% for err in form.password.errors %}
+            <span style="color:red">{{ err }}</span>
+            {% endfor %}
+        </p>
+        {{ form.submit }}
+    </form> -->
+    {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+    {% else: %}
+    <p>
+        Welcome back, user {{ email }}!
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -116,3 +116,7 @@ The repo is very loosely structured, but the idea is to be able to easily setup 
 ## Day 66
 - Build restful API
 - Purely test via postman
+
+## Day 67
+- Add restful API to blog post (add, update, delete blog posts)
+- Use wtf form for easy forms (contact, login, blog)
