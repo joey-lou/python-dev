@@ -26,6 +26,7 @@ requirements:
     - email_validator
     - flask-bootstrap
     - flask-ckeditor
+    - flask-login
     - flask-sqlalchemy
     - pydantic==1.7.3
     - requests==2.25.0
