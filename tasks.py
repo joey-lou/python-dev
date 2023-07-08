@@ -9,21 +9,21 @@ from invoke import UnexpectedExit, task
 
 def parse_failed_packages(stderr: str):
     matches = re.findall(
-        r"current channels:\s*((?:- |\w+=*[1-9\.\*]*\s*?)+)\s*Current channels",
+        r"current channels:\s*((?:- |[\w\-]+=*[1-9\.\*]*\s*?)+)\s*Current channels",
         stderr.replace("\n", ""),
     )[0]
     return [p.strip() for p in matches.rsplit("- ")[1:]]
 
 
 # use invoke to clean code
-@task(help="installs all dependency packages")
+@task()
 def bootstrap(ctx, python=python_version(), pip=False):
     def install_with_pip(*packages):
         ctx.run(f"pip install {' '.join(packages)}", echo=True)
 
     def install(*packages):
         try:
-            ctx.run(f"conda install {' '.join(packages)}", echo=True)
+            ctx.run(f"conda install {' '.join(packages)} -y", echo=True)
         except UnexpectedExit as e:
             if "PackagesNotFoundError" in e.result.stderr:
                 failed_packages = parse_failed_packages(e.result.stderr)
